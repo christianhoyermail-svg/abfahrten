@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f0d722">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Abfahrten">
+  <title>Meine Abfahrten</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f0d722'/%3E%3Ctext x='32' y='43' font-family='Arial' font-weight='700' font-size='26' text-anchor='middle' fill='%23111'%3EAb%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1>Meine Abfahrten</h1>
+      <div class="topbar-actions">
+        <button id="installBtn" class="btn" type="button" hidden>App installieren</button>
+        <button id="addBtn" class="btn btn-primary" type="button">+ Station</button>
+      </div>
+    </div>
+  </header>
+  <div id="offlineBar" class="offline-bar" hidden>Keine Internetverbindung – Abfahrten können nicht geladen werden.</div>
+
+  <main class="container">
+    <p id="emptyState" class="empty" hidden>
+      Noch keine Favoriten gespeichert.<br>
+      Tippe auf <strong>„+ Station“</strong>, um eine Haltestelle mit deiner Fahrtrichtung hinzuzufügen.
+    </p>
+    <ul id="favList" class="fav-list"></ul>
+
+    <div class="backup-bar">
+      <button id="exportBtn" class="btn btn-small" type="button">⤓ Exportieren</button>
+      <button id="importBtn" class="btn btn-small" type="button">⤒ Importieren</button>
+      <input id="importFile" type="file" accept=".json,application/json" hidden>
+    </div>
+  </main>
+
+  <!-- Dialog: Import -->
+  <dialog id="importDialog" class="dialog">
+    <form method="dialog" class="dialog-body">
+      <div class="dialog-head">
+        <h2>Favoriten importieren</h2>
+      </div>
+      <p id="importSummary" class="import-summary"></p>
+      <ul id="importPreview" class="import-preview"></ul>
+      <div class="dialog-actions import-actions">
+        <button type="submit" class="btn" value="cancel">Abbrechen</button>
+        <button type="submit" class="btn" value="replace" id="importReplace">Alle ersetzen</button>
+        <button type="submit" class="btn btn-primary" value="merge" id="importMerge">Hinzufügen</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer class="footer">
+    Daten: <a href="https://v6.bvg.transport.rest/" target="_blank" rel="noopener">BVG HAFAS API (transport.rest)</a> · Favoriten werden lokal in diesem Browser gespeichert.
+  </footer>
+
+  <!-- Dialog: Favorit anlegen / bearbeiten -->
+  <dialog id="favDialog" class="dialog">
+    <form method="dialog" id="favForm" class="dialog-body" autocomplete="off">
+      <div class="dialog-head">
+        <h2 id="dialogTitle">Station hinzufügen</h2>
+        <button type="button" class="icon-btn" id="dialogClose" aria-label="Schließen">✕</button>
+      </div>
+
+      <!-- Schritt 1: Station -->
+      <section class="step">
+        <label class="step-label" for="stationInput">1. Haltestelle</label>
+        <div id="stationChosen" class="chosen" hidden></div>
+        <div id="stationSearchWrap">
+          <input id="stationInput" class="input" type="search" placeholder="z. B. Alexanderplatz">
+          <ul id="stationResults" class="results"></ul>
+        </div>
+      </section>
+
+      <!-- Schritt 2: Richtung -->
+      <section class="step" id="stepDirection" hidden>
+        <span class="step-label">2. Fahrtrichtung</span>
+        <div id="directionChosen" class="chosen" hidden></div>
+        <div id="directionPickWrap">
+          <p class="hint">Wähle ein aktuelles Fahrtziel – oder suche eine Haltestelle, die in deiner Richtung liegt (z. B. die nächste Station).</p>
+          <div id="destQuick" class="quick"></div>
+          <input id="directionInput" class="input" type="search" placeholder="Haltestelle in Fahrtrichtung suchen">
+          <ul id="directionResults" class="results"></ul>
+        </div>
+      </section>
+
+      <!-- Schritt 3: Linien -->
+      <section class="step" id="stepLines" hidden>
+        <span class="step-label">3. Linien <span class="muted">(optional – nichts gewählt = alle)</span></span>
+        <div id="lineChips" class="chips"></div>
+      </section>
+
+      <!-- Schritt 4: Name -->
+      <section class="step" id="stepLabel" hidden>
+        <label class="step-label" for="labelInput">4. Eigener Name <span class="muted">(optional)</span></label>
+        <input id="labelInput" class="input" type="text" placeholder="z. B. Zur Arbeit">
+      </section>
+
+      <p id="dialogError" class="error" hidden></p>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn" id="cancelBtn">Abbrechen</button>
+        <button type="submit" class="btn btn-primary" id="saveBtn" disabled>Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
